@@ -449,8 +449,11 @@ character_portrait = ExtResource( 79 )
 [node name="Sprite" parent="Flip" index="0"]
 material = SubResource( 2 )
 frames = SubResource( 3 )
-animation = "AttackJab"
-frame = 6
+animation = "Start"
+frame = 11
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="Start" parent="StateMachine" index="0"]
 script = ExtResource( 211 )
