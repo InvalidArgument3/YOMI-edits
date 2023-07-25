@@ -14,3 +14,25 @@ jobs:
         with:
           files: HongMeiling/
           dest: EXPORT/Meiling/HongMeiling.zip
+          
+
+name: "Upload yomi-meiling"
+
+on:
+  workflow_run:
+    workflows: ["Zip Meiling"]
+    types:
+      - completed
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: AnarkisGaming/workshop@v1
+        with:
+          appID: 2212330
+          publishedFileID: 2967326865
+          changelog: ${{ github.event.head_commit.message }}              
+        env:
+          STEAM_ACCOUNT_NAME: ${{ secrets.accountname }}
+          STEAM_PASSWORD: ${{ secrets.password }}
