@@ -1,4 +1,4 @@
-name: "Upload yomi-meiling"
+name: "retroactively add latest zip meiling"
 
 on:
   workflow_run:

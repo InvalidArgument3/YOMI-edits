@@ -15,3 +15,5 @@ jobs:
           files: HongMeiling/
           dest: EXPORT/Meiling/HongMeiling.zip
           
+      - name: "retroactively add latest zip meiling"
+        uses: stefanzweifel/git-auto-commit-action@v4  
