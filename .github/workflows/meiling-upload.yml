@@ -15,6 +15,7 @@ jobs:
         with:
           appID: 2212330
           publishedFileID: 2967326865
+          path: "EXPORT/Meiling"
           changelog: ${{ github.event.head_commit.message }}              
         env:
           STEAM_ACCOUNT_NAME: ${{ secrets.accountname }}
