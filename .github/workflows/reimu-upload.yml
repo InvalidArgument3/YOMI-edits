@@ -1,9 +1,10 @@
 name: "Upload yomi-reimu"
 
 on:
-  push:
-    paths:
-      - "HakureiReimu/**"
+  workflow_run:
+    workflows: ["Zip Reimu"]
+    types:
+      - completed
 
 jobs:
   upload:
