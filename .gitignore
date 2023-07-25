@@ -1,5 +1,8 @@
-*
+/*
 !.gitignore
-!.github/**
-!HakureiReimu/**
-!HongMeiling/**
+!.github/*
+
+
+!/HakureiReimu/
+!/HongMeiling/
+!/EXPORT/
