@@ -1270,7 +1270,7 @@ mouse_filter = 2
 custom_constants/margin_right = 5
 custom_constants/margin_left = 5
 
-[node name="OptionsBar" type="HFlowContainer" parent="UILayer/GameUI/BottomBar/OptionsBarContainer"]
+[node name="OptionsBar" type="HBoxContainer" parent="UILayer/GameUI/BottomBar/OptionsBarContainer"]
 unique_name_in_owner = true
 visible = false
 margin_left = 5.0
@@ -1278,37 +1278,46 @@ margin_right = 635.0
 margin_bottom = 12.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_constants/hseparation = 3
+alignment = 1
 
 [node name="GhostButton" type="CheckButton" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
 unique_name_in_owner = true
-margin_right = 141.0
+margin_left = 19.0
+margin_right = 119.0
 margin_bottom = 12.0
 theme = ExtResource( 4 )
 pressed = true
 action_mode = 0
-text = "show prediction (buggy)"
+text = "show prediction"
 
 [node name="AfterimageButton" type="CheckButton" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
 unique_name_in_owner = true
-margin_left = 144.0
-margin_right = 225.0
+margin_left = 120.0
+margin_right = 201.0
 margin_bottom = 12.0
 pressed = true
 text = "afterimages"
 
 [node name="FreezeOnMyTurn" type="CheckButton" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
 unique_name_in_owner = true
-margin_left = 228.0
-margin_right = 406.0
+margin_left = 202.0
+margin_right = 304.0
 margin_bottom = 12.0
 pressed = true
-text = "freeze prediction on turn ready"
+text = "freeze on ready"
+
+[node name="FreezeSound" type="CheckButton" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
+unique_name_in_owner = true
+margin_left = 305.0
+margin_right = 393.0
+margin_bottom = 12.0
+pressed = true
+text = "freeze sound"
 
 [node name="GhostSpeed" type="HBoxContainer" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
 unique_name_in_owner = true
-margin_left = 409.0
-margin_right = 537.0
+margin_left = 394.0
+margin_right = 522.0
 margin_bottom = 12.0
 script = ExtResource( 13 )
 
@@ -1350,15 +1359,15 @@ text = "x4"
 
 [node name="ClearParticlesButton" type="Button" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
 unique_name_in_owner = true
-margin_left = 540.0
-margin_right = 613.0
+margin_left = 523.0
+margin_right = 596.0
 margin_bottom = 12.0
 text = "clear particles"
 
 [node name="PredictionSettingsCloseButton" type="Button" parent="UILayer/GameUI/BottomBar/OptionsBarContainer/OptionsBar"]
 unique_name_in_owner = true
-margin_left = 616.0
-margin_right = 630.0
+margin_left = 597.0
+margin_right = 611.0
 margin_bottom = 12.0
 icon = ExtResource( 66 )
 
@@ -1625,7 +1634,7 @@ margin_right = 205.0
 margin_bottom = 161.0
 rect_pivot_offset = Vector2( 65, 38 )
 mouse_filter = 1
-text = "Use DI to alter this player's trajectory and throw off opponents when they're getting hit. Angle DI *against* an attack's knockback direction to brace for impact, reducing hitstun."
+text = "Use DI to alter this player's trajectory and throw off opponents when they're getting hit."
 autowrap = true
 
 [node name="HelpText12" parent="UILayer/GameUI/HelpScreen" instance=ExtResource( 61 )]
@@ -1784,8 +1793,9 @@ flat = true
 [node name="WorkshopUploader" type="Button" parent="UILayer/MainMenu/ButtonContainer"]
 unique_name_in_owner = true
 visible = false
-margin_right = 113.0
-margin_bottom = 20.0
+margin_top = 180.0
+margin_right = 96.0
+margin_bottom = 200.0
 rect_min_size = Vector2( 0, 20 )
 mouse_default_cursor_shape = 2
 custom_colors/font_color_hover = Color( 1, 0.2, 0.239216, 1 )

@@ -2,12 +2,13 @@ extends Node
 
 signal nag_window()
 
-var VERSION = "1.5.3-steam"
+var VERSION = "1.7.0-steam"
 const RESOLUTION = Vector2(640, 360)
 
 var audio_player
 var music_enabled = true
 var freeze_ghost_prediction = true
+var freeze_ghost_sound = true
 var ghost_afterimages = true
 var fullscreen = false
 var show_hitboxes = false
@@ -36,7 +37,7 @@ var name_paths = {
 	"Wizard":"res://characters/wizard/Wizard.tscn", 
 	"Robot":"res://characters/robo/Robot.tscn", 
 	"Mutant":"res://characters/beast/Mutant.tscn", 
-	"HongMeiling":"res://HongMeiling/characters/HongMeiling/HongMeiling.tscn", 
+	#"HongMeiling":"res://HongMeiling/characters/HongMeiling/HongMeiling.tscn", 
 	"HakureiReimu":"res://HakureiReimu/characters/HakureiReimu/HakureiReimu.tscn", 
 }
 
@@ -177,6 +178,7 @@ func save_options():
 		"options":{
 			"music_enabled":music_enabled, 
 			"freeze_ghost_prediction":freeze_ghost_prediction, 
+			"freeze_ghost_sound":freeze_ghost_sound, 
 			"ghost_afterimages":ghost_afterimages, 
 			"fullscreen":fullscreen, 
 			"show_hitboxes":show_hitboxes, 
@@ -200,6 +202,7 @@ func get_default_player_data():
 		"options":{
 			"music_enabled":true, 
 			"freeze_ghost_prediction":true, 
+			"freeze_ghost_sound":true, 
 			"ghost_afterimages":true, 
 			"fullscreen":false, 
 			"show_hitboxes":false, 
@@ -212,7 +215,6 @@ func get_default_player_data():
 			"enable_custom_hit_sparks":true, 
 			"show_projectile_owners":true, 
 			"speed_lines_enabled":true, 
-
 		}
 	}
 

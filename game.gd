@@ -837,19 +837,19 @@ func apply_hitboxes(players):
 			p1_hit = true
 		else :
 			p2_throwing = true
-			if not p1_hit_by.hits_otg and px1.is_otg():
-				p2_throwing = false
-			if px1.throw_invulnerable:
-				p2_throwing = false
+
+
+
+
 	if p2_hit_by:
 		if not (p2_hit_by is ThrowBox):
 			p2_hit = true
 		else :
 			p1_throwing = true
-			if not p2_hit_by.hits_otg and px2.is_otg():
-				p1_throwing = false
-			if px2.throw_invulnerable:
-				p1_throwing = false
+
+
+
+
 
 	var clash_position = Vector2()
 	var clashed = false
@@ -1034,8 +1034,20 @@ func get_colliding_hitbox(hitboxes, hurtbox)->Hitbox:
 	var hit_by = null
 	for hitbox in hitboxes:
 		if hitbox is Hitbox:
-			var grounded = (hurtbox.get_parent().is_grounded() if not (hurtbox is Hitbox) else true)
+			var host = hurtbox.get_parent()
+			if host is ObjectState:
+				host = host.host
+			var grounded = (host.is_grounded() if not (hurtbox is Hitbox) else true)
+			var otg = (host.is_otg() if not (hurtbox is Hitbox) else false)
+			if hitbox is ThrowBox and host.throw_invulnerable:
+				continue
 			if ( not hitbox.hits_vs_aerial and not grounded) or ( not hitbox.hits_vs_grounded and grounded):
+				continue
+			if not otg and not hitbox.hits_vs_standing:
+				continue
+			if otg and not hitbox.hits_otg:
+				continue
+			if not host.is_in_group("Fighter") and not hitbox.hits_projectiles:
 				continue
 			if hitbox.overlaps(hurtbox):
 				hit_by = hitbox

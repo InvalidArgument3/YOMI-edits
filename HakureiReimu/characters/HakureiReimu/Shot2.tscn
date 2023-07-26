@@ -6,7 +6,7 @@
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/Bullets/bulletA000.png" type="Texture" id=4]
 [ext_resource path="res://mechanics/Hitbox.gd" type="Script" id=5]
 [ext_resource path="res://sound/common/hit2.wav" type="AudioStream" id=6]
-[ext_resource path="res://HongMeiling/characters/HongMeiling/ParticleEffect.tscn" type="PackedScene" id=7]
+[ext_resource path="res://HakureiReimu/characters/HakureiReimu/ParticleEffect.tscn" type="PackedScene" id=7]
 
 [sub_resource type="ShaderMaterial" id=1]
 resource_local_to_scene = true
