@@ -1,4 +1,4 @@
-[gd_scene load_steps=182 format=2]
+[gd_scene load_steps=184 format=2]
 
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/AirAttack/attackC006.png" type="Texture" id=1]
 [ext_resource path="res://characters/BaseChar.tscn" type="PackedScene" id=2]
@@ -95,6 +95,7 @@
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/DownKick/attackE000.png" type="Texture" id=93]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/States/Start.gd" type="Script" id=94]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/ActionUiData/ReimuDownKickActionUIData.tscn" type="PackedScene" id=95]
+[ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sounds/reimu_stare.wav" type="AudioStream" id=96]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/SlideKick/attackD003.png" type="Texture" id=97]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/SlideKick/attackD001.png" type="Texture" id=98]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/SlideKick/attackD000.png" type="Texture" id=99]
@@ -136,6 +137,7 @@
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/ForwardThrow/shotC006.png" type="Texture" id=135]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/AirAttack/attackC008.png" type="Texture" id=136]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/SlideKick/attackD007.png" type="Texture" id=137]
+[ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sounds/se_tan01.wav" type="AudioStream" id=138]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/AirAttack/attackC005.png" type="Texture" id=140]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/SlideKick/attackD008.png" type="Texture" id=141]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/SlideKick/attackD005.png" type="Texture" id=142]
@@ -748,6 +750,7 @@ anim_length = 9
 force_dir_x = "-2"
 force_speed = "2"
 force_tick = 10
+sfx = ExtResource( 138 )
 sfx_volume = -10.0
 projectile_pos_x = 17
 projectile_pos_y = -21
@@ -776,6 +779,7 @@ ticks_per_frame = 2
 force_dir_x = "-2"
 force_speed = "2"
 force_tick = 10
+sfx = ExtResource( 138 )
 sfx_volume = -10.0
 projectile_pos_x = 17
 projectile_pos_y = -21
@@ -796,18 +800,7 @@ script = ExtResource( 47 )
 __meta__ = {
 "_editor_description_": ""
 }
-apply_forces = false
-apply_fric = false
-apply_grav = false
-sprite_animation = ""
-anim_length = 1
-title = ""
-type = 0
-button_texture = null
-interruptible_on_opponent_turn = false
-next_state_on_hold = true
-interrupt_from_string = ""
-interrupt_into_string = ""
+sfx = ExtResource( 96 )
 
 [node name="EmoteLabel" parent="." index="10"]
 margin_top = -67.0
