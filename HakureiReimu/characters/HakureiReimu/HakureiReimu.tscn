@@ -1,4 +1,4 @@
-[gd_scene load_steps=184 format=2]
+[gd_scene load_steps=183 format=2]
 
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/AirAttack/attackC006.png" type="Texture" id=1]
 [ext_resource path="res://characters/BaseChar.tscn" type="PackedScene" id=2]
@@ -161,7 +161,6 @@
 [ext_resource path="res://characters/wizard/sprites/actionbuttons/magic_missile.png" type="Texture" id=195]
 [ext_resource path="res://ui/ActionSelector/StateIcons/punch.png" type="Texture" id=197]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/Start/spellCall009.png" type="Texture" id=199]
-[ext_resource path="res://HongMeiling/characters/HongMeiling/Sounds/bc.wav" type="AudioStream" id=201]
 [ext_resource path="res://HongMeiling/characters/HongMeiling/States/MeilingTaunt.gd" type="Script" id=202]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/Start/spellCall011.png" type="Texture" id=203]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/Start/spellCall005.png" type="Texture" id=204]
@@ -801,7 +800,6 @@ __meta__ = {
 ticks_per_frame = 10
 loop_animation = true
 enter_sfx_volume = 0.0
-sfx = ExtResource( 201 )
 sfx_volume = 0.0
 
 [node name="EmoteLabel" parent="." index="10"]
