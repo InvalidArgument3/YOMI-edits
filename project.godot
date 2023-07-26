@@ -177,7 +177,7 @@ _global_script_classes=[ {
 "base": "CharacterState",
 "class": "MeilingState",
 "language": "GDScript",
-"path": "res://HakureiReimu/characters/HakureiReimu/States/ReimuState.gd"
+"path": "res://HongMeiling/characters/HongMeiling/States/MeilingState.gd"
 }, {
 "base": "Reference",
 "class": "MultiplayerClient",
