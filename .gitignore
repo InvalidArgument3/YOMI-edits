@@ -3,7 +3,7 @@
 addons/
 assets/
 bin/
-characters/
+characters/*
 framework/
 fx/
 lib/
