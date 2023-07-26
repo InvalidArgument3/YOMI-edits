@@ -16,10 +16,3 @@ sound/
 supporter/
 test/
 ui/
-*.gd
-*.import
-*.png
-*.tres
-*.tscn
-*.log
-*.godot
