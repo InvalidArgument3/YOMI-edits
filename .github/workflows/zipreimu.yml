@@ -13,7 +13,7 @@ jobs:
       - uses: vimtor/action-zip@v1
         with:
           files: HongMeiling/
-          dest: EXPORT/Meiling/HakureiReimu.zip
+          dest: EXPORT/Reimu/HakureiReimu.zip
           
-      - name: "retroactively add latest zip meiling"
+      - name: "retroactively add latest zip reimu"
         uses: stefanzweifel/git-auto-commit-action@v4  
