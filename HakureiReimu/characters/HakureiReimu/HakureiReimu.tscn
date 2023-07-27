@@ -412,8 +412,6 @@ character_portrait = ExtResource( 79 )
 material = SubResource( 2 )
 frames = SubResource( 3 )
 animation = "LowGoheiSpin"
-frame = 7
-playing = true
 __meta__ = {
 "_edit_group_": true
 }
