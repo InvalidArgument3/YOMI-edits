@@ -410,9 +410,9 @@ character_portrait = ExtResource( 79 )
 
 [node name="Sprite" parent="Flip" index="0"]
 material = SubResource( 2 )
+position = Vector2( 0, -1 )
 frames = SubResource( 3 )
-animation = "AttackJab"
-frame = 5
+animation = "DashBackward"
 playing = true
 __meta__ = {
 "_edit_group_": true
