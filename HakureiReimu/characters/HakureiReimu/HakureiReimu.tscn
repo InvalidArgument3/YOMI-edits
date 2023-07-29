@@ -412,8 +412,8 @@ character_portrait = ExtResource( 79 )
 material = SubResource( 2 )
 position = Vector2( 0, -1 )
 frames = SubResource( 3 )
-animation = "DiveKick"
-frame = 1
+animation = "DoubleJump"
+frame = 2
 playing = true
 __meta__ = {
 "_edit_group_": true
