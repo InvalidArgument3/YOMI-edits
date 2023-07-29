@@ -1,4 +1,4 @@
-[gd_scene load_steps=184 format=2]
+[gd_scene load_steps=183 format=2]
 
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/AirAttack/attackC006.png" type="Texture" id=1]
 [ext_resource path="res://characters/BaseChar.tscn" type="PackedScene" id=2]
@@ -24,7 +24,6 @@
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/ForwardThrow/shotC004.png" type="Texture" id=22]
 [ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/Shot1/spellA004.png" type="Texture" id=23]
 [ext_resource path="res://characters/stickman/sprites/stickman36.png" type="Texture" id=24]
-[ext_resource path="res://HakureiReimu/characters/HakureiReimu/Sprites/HurtAerial/hitAir000.png" type="Texture" id=25]
 [ext_resource path="res://characters/stickman/sprites/stickman34.png" type="Texture" id=26]
 [ext_resource path="res://characters/stickman/sprites/stickman26.png" type="Texture" id=27]
 [ext_resource path="res://characters/stickman/sprites/stickman27.png" type="Texture" id=28]
@@ -298,7 +297,7 @@ animations = [ {
 "name": "GroundedSweep",
 "speed": 5.0
 }, {
-"frames": [ ExtResource( 25 ), ExtResource( 110 ), ExtResource( 19 ), ExtResource( 117 ), ExtResource( 100 ), ExtResource( 18 ), ExtResource( 10 ) ],
+"frames": [ ExtResource( 110 ), ExtResource( 19 ), ExtResource( 117 ), ExtResource( 100 ), ExtResource( 18 ), ExtResource( 10 ) ],
 "loop": true,
 "name": "HurtAerial",
 "speed": 5.0
@@ -412,8 +411,7 @@ character_portrait = ExtResource( 79 )
 material = SubResource( 2 )
 position = Vector2( 0, -1 )
 frames = SubResource( 3 )
-animation = "DoubleJump"
-frame = 2
+animation = "InstantCancel"
 playing = true
 __meta__ = {
 "_edit_group_": true
