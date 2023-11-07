@@ -2,7 +2,7 @@ extends Node
 
 signal nag_window()
 
-var VERSION = "1.7.0-steam"
+var VERSION = "1.8.23-steam"
 const RESOLUTION = Vector2(640, 360)
 
 var audio_player
@@ -12,6 +12,7 @@ var freeze_ghost_sound = true
 var ghost_afterimages = true
 var fullscreen = false
 var show_hitboxes = false
+var show_extra_info = false
 var light_mode = false
 var frame_advance = false
 var show_playback_controls = false
@@ -28,17 +29,17 @@ var enable_emotes = true
 var steam_demo_version = false
 var show_last_move_indicators = true
 var speed_lines_enabled = true
+var auto_fc = true
 
 var mouse_world_position = Vector2()
+var rng = BetterRng.new()
 
 var name_paths = {
 	"Ninja":"res://characters/stickman/NinjaGuy.tscn", 
 	"Cowboy":"res://characters/swordandgun/SwordGuy.tscn", 
 	"Wizard":"res://characters/wizard/Wizard.tscn", 
 	"Robot":"res://characters/robo/Robot.tscn", 
-	"Mutant":"res://characters/beast/Mutant.tscn", 
-	#"HongMeiling":"res://HongMeiling/characters/HongMeiling/HongMeiling.tscn", 
-	"HakureiReimu":"res://HakureiReimu/characters/HakureiReimu/HakureiReimu.tscn", 
+	"Mutant":"res://characters/mutant/Mutant.tscn", 
 }
 
 var songs = {
@@ -92,6 +93,8 @@ func _enter_tree():
 
 
 
+	randomize()
+	rng.randomize()
 	set_music_enabled(music_enabled)
 	set_fullscreen(fullscreen)
 
@@ -101,18 +104,18 @@ func _ready():
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
 	yield (get_tree(), "idle_frame")
-	randomize()
 	if randi() % 50 == 0 and not SteamHustle.STARTED:
 		emit_signal("nag_window")
 
 func set_music_enabled(on):
 	music_enabled = on
 	if on:
-		play_song("bg1")
-		pass
+		play_random_song()
 	else :
 		audio_player.stop()
-		pass
+
+func play_random_song():
+	play_song(rng.choose(songs.keys()))
 
 func has_supporter_pack():
 	return true
@@ -186,12 +189,14 @@ func save_options():
 			"show_playback_controls":show_playback_controls, 
 			"show_projectile_owners":show_projectile_owners, 
 			"default_dojo":0, 
+			"show_extra_info":show_extra_info, 
 
 			"enable_emotes":enable_emotes, 
 			"enable_custom_colors":enable_custom_colors, 
 			"enable_custom_particles":enable_custom_particles, 
 			"enable_custom_hit_sparks":enable_custom_hit_sparks, 
 			"speed_lines_enabled":speed_lines_enabled, 
+			"auto_fc":auto_fc, 
 		}
 	})
 
@@ -215,6 +220,8 @@ func get_default_player_data():
 			"enable_custom_hit_sparks":true, 
 			"show_projectile_owners":true, 
 			"speed_lines_enabled":true, 
+			"auto_fc":true, 
+			"show_extra_info":false
 		}
 	}
 

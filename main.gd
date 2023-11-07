@@ -1,6 +1,7 @@
 extends Node
 
 signal game_started()
+signal game_setup()
 
 onready var ui_layer = $UILayer
 onready var game_layer = $GameLayer
@@ -21,6 +22,8 @@ var p2_ghost_data
 var p2_ghost_extra
 
 var match_data = {}
+
+var started_ghost_this_frame = false
 
 func _ready():
 	ui_layer.connect("singleplayer_started", self, "_on_game_started", [true])
@@ -115,6 +118,7 @@ func _on_match_ready(data):
 	setup_game(singleplayer, data)
 	emit_signal("game_started")
 
+
 func show_lobby():
 	$"%DirectConnectLobby".show()
 	$"%Lobby".show()
@@ -124,6 +128,7 @@ func setup_game(singleplayer, data):
 	if is_instance_valid(game):
 		game.queue_free()
 	call_deferred("setup_game_deferred", singleplayer, data)
+	emit_signal("game_setup")
 
 func setup_main_menu_game():
 	game = preload("res://Game.tscn").instance()
@@ -178,13 +183,21 @@ func setup_game_deferred(singleplayer, data):
 	p1_info_scene.set_fighter(p1)
 	p2_info_scene.set_fighter(p2)
 	if $"%P1InfoContainer".get_child(0) is PlayerInfo:
-		$"%P1InfoContainer".remove_child($"%P1InfoContainer".get_child(0))
+
+		$"%P1InfoContainer".get_child(0).queue_free()
 	if $"%P2InfoContainer".get_child(0) is PlayerInfo:
-		$"%P2InfoContainer".remove_child($"%P2InfoContainer".get_child(0))
+
+		$"%P2InfoContainer".get_child(0).queue_free()
+	for child in $"%ActivePlayerInfoContainer".get_children():
+		child.queue_free()
+
+
 	$"%P1InfoContainer".add_child(p1_info_scene)
 	$"%P1InfoContainer".move_child(p1_info_scene, 0)
 	$"%P2InfoContainer".add_child(p2_info_scene)
 	$"%P2InfoContainer".move_child(p2_info_scene, 0)
+	ui_layer.p1_info_scene = p1_info_scene
+	ui_layer.p2_info_scene = p2_info_scene
 
 func _on_ghost_button_toggled(toggled):
 	if toggled:
@@ -222,6 +235,9 @@ func _process(_delta):
 		$"%SpeedLines".tick = game.current_tick
 		$"%SpeedLines".on = not game.is_waiting_on_player()
 
+func _physics_process(delta):
+	set_deferred("started_ghost_this_frame", false)
+
 func align_afterimages():
 	if is_instance_valid(game):
 		var zoom = game.camera.zoom.x * game.camera_zoom
@@ -232,6 +248,10 @@ func align_afterimages():
 			image.visible = $"%AfterimageButton".pressed
 
 func _start_ghost():
+	if started_ghost_this_frame:
+		return 
+	started_ghost_this_frame = true
+
 	if not $"%GhostWaitTimer".is_stopped():
 		yield ($"%GhostWaitTimer", "timeout")
 		return 
@@ -249,7 +269,7 @@ func _start_ghost():
 		return 
 	if not game.prediction_enabled:
 		return 
-	
+
 	ghost_game = preload("res://Game.tscn").instance()
 	ghost_game.is_ghost = true
 	$"%GhostViewport".add_child(ghost_game)
@@ -274,6 +294,7 @@ func _start_ghost():
 	p2.queued_extra = p2_ghost_extra
 	p2.is_ghost = true
 	call_deferred("fix_ghost_objects", ghost_game)
+
 
 func ghost_my_turn():
 	if Global.freeze_ghost_sound:

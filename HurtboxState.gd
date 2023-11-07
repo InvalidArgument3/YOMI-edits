@@ -14,6 +14,9 @@ var current_tick = 0
 
 var prev_state
 
+func _ready():
+	z_index = 999
+
 func start(host):
 	started = true
 	ended = false

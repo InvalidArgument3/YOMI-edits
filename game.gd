@@ -7,7 +7,7 @@ const SUPER_FREEZE_TICKS = 20
 const GHOST_ACTIONABLE_FREEZE_TICKS = 10
 const CAMERA_MAX_Y_DIST = 210
 const QUITTER_FOCUS_TICKS = 60
-const CLASH_DAMAGE_DIFF = 40
+const CLASH_DAMAGE_DIFF = 25
 const CAMERA_PADDING = 20
 
 export (int) var char_distance = 200
@@ -178,6 +178,16 @@ func connect_signals(object):
 func copy_to(game:Game):
 	if not game_started:
 		return 
+
+
+
+
+
+
+	p1.chara.copy_to(game.p1.chara)
+	p2.chara.copy_to(game.p2.chara)
+	game.p1.update_data()
+	game.p2.update_data()
 	p1.copy_to(game.p1)
 	p2.copy_to(game.p2)
 	game.p1.hp = p1.hp
@@ -243,9 +253,12 @@ func on_object_spawned(obj:BaseObj):
 	obj.ceiling_height = ceiling_height
 	obj.obj_name = str(objs_map.size() + 1)
 	obj.logic_rng = BetterRng.new()
+	obj.logic_rng_static = BetterRng.new()
 	var seed_ = hash(match_data.seed + (objs_map.size() + 1))
 	obj.logic_rng.seed = seed_
 	obj.logic_rng_seed = seed_
+	obj.logic_rng_static.seed = match_data.seed
+	obj.logic_rng_static_seed = match_data.seed
 	objs_map[obj.obj_name if obj.obj_name else obj.name] = obj
 	obj.objs_map = objs_map
 	obj.connect("tree_exited", self, "_on_obj_exit_tree", [obj])
@@ -277,6 +290,10 @@ func on_clash():
 
 func on_parry():
 	super_freeze_ticks = 10
+	parry_freeze = true
+
+func on_block():
+	super_freeze_ticks = 7
 	parry_freeze = true
 
 func on_global_hitlag(amount):
@@ -314,6 +331,8 @@ func start_game(singleplayer:bool, match_data:Dictionary):
 	p2.connect("parried", self, "on_parry")
 	p1.connect("clashed", self, "on_clash")
 	p2.connect("clashed", self, "on_clash")
+
+
 	p1.connect("predicted", self, "on_prediction", [p1])
 	p2.connect("predicted", self, "on_prediction", [p2])
 	stage_width = Utils.int_clamp(match_data.stage_width, 100, 50000)
@@ -347,10 +366,17 @@ func start_game(singleplayer:bool, match_data:Dictionary):
 	p2.name = "P2"
 	p1.logic_rng = BetterRng.new()
 	p2.logic_rng = BetterRng.new()
+	p1.logic_rng_static = BetterRng.new()
+	p2.logic_rng_static = BetterRng.new()
 	p1.logic_rng.seed = hash(match_data.seed)
 	p1.logic_rng_seed = hash(match_data.seed)
 	p2.logic_rng.seed = hash(match_data.seed + 1)
 	p2.logic_rng_seed = hash(match_data.seed + 1)
+	p1.logic_rng_static.seed = hash(match_data.seed)
+	p1.logic_rng_static_seed = hash(match_data.seed)
+	p2.logic_rng_static.seed = hash(match_data.seed + 1)
+	p2.logic_rng_static_seed = hash(match_data.seed + 1)
+
 	p2.id = 2
 	p1.is_ghost = is_ghost
 	p2.is_ghost = is_ghost
@@ -455,7 +481,7 @@ func start_game(singleplayer:bool, match_data:Dictionary):
 	if not ReplayManager.resimulating:
 		show_state()
 	if ReplayManager.playback and not ReplayManager.resimulating and not is_ghost:
-		yield (get_tree().create_timer(0.5 if not ReplayManager.replaying_ingame else 0.1), "timeout")
+		yield (get_tree().create_timer(0.5 if not ReplayManager.replaying_ingame else 0.25), "timeout")
 	game_started = true
 	if not is_ghost:
 		if SteamLobby.is_fighting():
@@ -537,7 +563,7 @@ func tick():
 			object.set_pos( - stage_width, pos.y)
 		elif pos.x > stage_width:
 			object.set_pos(stage_width, pos.y)
-		if has_ceiling and pos.y < - ceiling_height:
+		if has_ceiling and pos.y <= - ceiling_height:
 			object.set_y( - ceiling_height)
 			object.on_hit_ceiling()
 
@@ -823,8 +849,18 @@ func resolve_collisions(p1, p2, step = 0):
 func apply_hitboxes(players):
 	var px1 = players[0]
 	var px2 = players[1]
+
 	var p1_hitboxes = px1.get_active_hitboxes()
 	var p2_hitboxes = px2.get_active_hitboxes()
+
+	var p1_pos = px1.get_pos()
+	var p2_pos = px2.get_pos()
+	
+	for hitbox in p1_hitboxes:
+		hitbox.update_position(p1_pos.x, p1_pos.y)
+	for hitbox in p2_hitboxes:
+		hitbox.update_position(p2_pos.x, p2_pos.y)
+
 	var p2_hit_by = get_colliding_hitbox(p1_hitboxes, px2.hurtbox) if not px2.invulnerable else null
 	var p1_hit_by = get_colliding_hitbox(p2_hitboxes, px1.hurtbox) if not px1.invulnerable else null
 	var p1_hit = false
@@ -867,7 +903,7 @@ func apply_hitboxes(players):
 					continue
 				var valid_clash = false
 				
-
+				
 
 				if asymmetrical_clashing:
 					if p1_hit and not p2_hit:
@@ -893,6 +929,7 @@ func apply_hitboxes(players):
 				if valid_clash:
 					clashed = true
 					clash_position = p2_hitbox.get_overlap_center_float(p1_hitbox)
+					
 					break
 
 	if clashed:
@@ -969,6 +1006,15 @@ func apply_hitboxes(players):
 	for object in objects:
 		if object.disabled:
 			continue
+		
+		
+		var o_hitboxes = object.get_active_hitboxes()
+
+		var o_pos = object.get_pos()
+
+		for hitbox in o_hitboxes:
+			hitbox.update_position(o_pos.x, o_pos.y)
+
 		for p in [px1, px2]:
 			var p_hit_by
 			if p == p1:
@@ -993,9 +1039,7 @@ func apply_hitboxes(players):
 				p_hit_by = get_colliding_hitbox(hitboxes, p.hurtbox)
 				if p_hit_by:
 					p_hit_by.hit(p)
-				
 
-			
 
 
 
@@ -1037,10 +1081,26 @@ func get_colliding_hitbox(hitboxes, hurtbox)->Hitbox:
 			var host = hurtbox.get_parent()
 			if host is ObjectState:
 				host = host.host
+			var attacker = hitbox.host
 			var grounded = (host.is_grounded() if not (hurtbox is Hitbox) else true)
 			var otg = (host.is_otg() if not (hurtbox is Hitbox) else false)
-			if hitbox is ThrowBox and host.throw_invulnerable:
-				continue
+			if not hitbox.overlaps(hurtbox):
+				var any_collisions = false
+				if host and host.current_state():
+					for hurtbox_ in host.current_state().get_active_hurtboxes():
+						if hitbox.overlaps(hurtbox_):
+							any_collisions = true
+							break
+				if not any_collisions:
+					continue
+			if hitbox is ThrowBox:
+				if not host.can_be_thrown():
+					if host.is_in_group("Fighter") and host.blockstun_ticks > 0:
+						hitbox.save_hit_object(host)
+					continue
+				if host.is_in_group("Fighter"):
+					if host.wakeup_throw_immunity_ticks > 0:
+						continue
 			if ( not hitbox.hits_vs_aerial and not grounded) or ( not hitbox.hits_vs_grounded and grounded):
 				continue
 			if not otg and not hitbox.hits_vs_standing:
@@ -1049,8 +1109,19 @@ func get_colliding_hitbox(hitboxes, hurtbox)->Hitbox:
 				continue
 			if not host.is_in_group("Fighter") and not hitbox.hits_projectiles:
 				continue
-			if hitbox.overlaps(hurtbox):
-				hit_by = hitbox
+			if hitbox.already_hit_object(host):
+				continue
+			if attacker:
+				if not attacker.is_grounded():
+					if host.aerial_attack_immune:
+						continue
+				else :
+					if host.grounded_attack_immune:
+						continue
+				if attacker.id == host.id and not hitbox.allowed_to_hit_own_team:
+					continue
+			hit_by = hitbox
+
 	return hit_by
 
 func is_waiting_on_player():
@@ -1326,8 +1397,8 @@ func _physics_process(_delta):
 					get_player(id).on_action_selected(input.action, input.data, input.extra)
 
 func ghost_tick():
-	p1.actionable_label.hide()
-	p2.actionable_label.hide()
+
+
 	var simulate_frames = 1
 	if ghost_speed == 1:
 		simulate_frames = 1 if ghost_tick % 4 == 0 else 0
@@ -1337,7 +1408,8 @@ func ghost_tick():
 	if ghost_speed == 1:
 		ghost_multiplier = 4
 	ghost_advantage_tick /= ghost_multiplier
-
+	p1.grounded_indicator.hide()
+	p2.grounded_indicator.hide()
 	for i in range(simulate_frames):
 		if ghost_actionable_freeze_ticks == 0:
 			simulate_one_tick()
@@ -1355,12 +1427,20 @@ func ghost_tick():
 			p1.set_ghost_colors()
 			if ghost_freeze:
 				ghost_actionable_freeze_ticks = GHOST_ACTIONABLE_FREEZE_TICKS
-				p1.actionable_label.show()
-				emit_signal("ghost_my_turn")
 			else :
 				ghost_actionable_freeze_ticks = 1
+			if not p1.actionable_label.visible:
+				p1.actionable_label.show()
+				p1.actionable_label.text = "Ready\nin %sf" % p1.turn_frames
+				p1.grounded_indicator.visible = p1.is_grounded() and p1.ghost_was_in_air
+
+			emit_signal("ghost_my_turn")
 			if p2.current_state().interruptible_on_opponent_turn or p2.feinting or negative_on_hit(p2):
-				p2.actionable_label.show()
+				if not p2.actionable_label.visible:
+					p2.actionable_label.show()
+					p2.actionable_label.text = "Ready\nin %sf" % p2.turn_frames
+
+					p2.grounded_indicator.visible = p2.is_grounded() and p2.ghost_was_in_air
 				ghost_p2_actionable = true
 				
 
@@ -1376,13 +1456,21 @@ func ghost_tick():
 			p2.set_ghost_colors()
 			if ghost_freeze:
 				ghost_actionable_freeze_ticks = GHOST_ACTIONABLE_FREEZE_TICKS
-				p2.actionable_label.show()
-				emit_signal("ghost_my_turn")
 			else :
 				ghost_actionable_freeze_ticks = 1
+			if not p2.actionable_label.visible:
+				p2.actionable_label.show()
+				p2.actionable_label.text = "Ready\nin %sf" % p2.turn_frames
+
+				p2.grounded_indicator.visible = p2.is_grounded() and p2.ghost_was_in_air
+			emit_signal("ghost_my_turn")
 			if p1.current_state().interruptible_on_opponent_turn or p1.feinting or negative_on_hit(p1):
 				ghost_p1_actionable = true
-				p1.actionable_label.show()
+				if not p1.actionable_label.visible:
+					p1.actionable_label.show()
+					p1.actionable_label.text = "Ready\nin %sf" % p1.turn_frames
+					p1.grounded_indicator.visible = p1.is_grounded() and p1.ghost_was_in_air
+
 				
 
 
@@ -1418,6 +1506,7 @@ func _unhandled_input(event:InputEvent):
 			if event.is_action_pressed("edit_replay"):
 				if ReplayManager.playback:
 					buffer_edit = true
+					ReplayManager.play_full = false
 	if not is_ghost:
 		if event is InputEventMouseButton:
 			if event.pressed:
@@ -1426,6 +1515,7 @@ func _unhandled_input(event:InputEvent):
 				if event.button_index == BUTTON_WHEEL_DOWN:
 					zoom_out()
 	update_mouse_world_position()
+
 func update_camera_limits():
 	if camera_zoom == 1.0 and stage_width > 320:
 		camera.limit_left = - stage_width - CAMERA_PADDING

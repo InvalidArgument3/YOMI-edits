@@ -41,6 +41,7 @@ export  var loop_animation = false
 export  var animation_loop_start = 0
 export  var absolute_loop = false
 export  var endless = false
+export  var disable_at_end = false
 
 export  var _c_Static_Force = 0
 export  var force_dir_x = "0.0"
@@ -93,19 +94,26 @@ export  var _c_Meta = 0
 export  var host_commands = {
 }
 
+export  var earliest_hitbox = 0
+var earliest_hitbox_node = null
+var is_guard_break = false
+
 export  var _c_Auto = 0
 export  var throw_positions:Dictionary = {}
 
 var enter_sfx_player
 var sfx_player
 
+
 var current_tick = - 1
 var current_real_tick = - 1
 var start_tick = - 1
 var last_facing = 1
 var fixed
+var native
 
 var anim_name
+var property_list:PoolStringArray
 
 var has_hitboxes = false
 
@@ -122,6 +130,9 @@ var hurtbox_state_change_frames = {
 	
 }
 
+var limb_hurtboxes = []
+
+var all_hitbox_nodes = []
 var frame_methods = []
 var frame_methods_shared = []
 var max_tick = - 1
@@ -151,11 +162,34 @@ func get_active_hitboxes():
 	var pos = host.get_pos()
 	for start_frame in hitbox_start_frames:
 		var items = hitbox_start_frames[start_frame]
-		for item in items:
-			if item is Hitbox:
-				item.update_position(pos.x, pos.y)
-				hitboxes.append(item)
+		for hitbox in items:
+			if hitbox is Hitbox:
+				if hitbox.active:
+					hitboxes.append(hitbox)
+	for hitbox in all_hitbox_nodes:
+			if hitbox is Hitbox:
+				if hitbox.active and not (hitbox in hitboxes):
+					hitboxes.append(hitbox)
 	return hitboxes
+
+func get_active_hurtboxes():
+	var hurtboxes = []
+	for child in get_children():
+		if child is LimbHurtbox:
+			if is_hurtbox_active(child):
+				hurtboxes.append(child)
+	return hurtboxes
+
+func is_hurtbox_active(hurtbox:LimbHurtbox):
+	var after_start = hurtbox.start_tick <= 0
+	if not after_start:
+		if current_tick + 1 > hurtbox.start_tick:
+			after_start = true
+	var before_end = hurtbox.endless
+	if not before_end:
+		if current_tick <= hurtbox.start_tick + hurtbox.active_ticks:
+			before_end = true
+	return after_start and before_end
 
 func _tick_before():
 	pass
@@ -188,9 +222,10 @@ func _tick_shared():
 		current_tick += 1
 
 		process_hitboxes()
+		process_hurtboxes()
 
-		update_sprite_frame()
-		update_hurtbox()
+		if host.can_update_sprite:
+			update_sprite_frame()
 		if current_tick == sfx_tick and sfx_player and not ReplayManager.resimulating:
 			sfx_player.play()
 		if current_tick == force_tick:
@@ -285,22 +320,27 @@ func _tick_shared():
 			host.apply_forces()
 
 func process_hitboxes():
+	host.update_data()
+	var pos = host.get_pos()
 	if hitbox_start_frames.has(current_tick + 1):
 		for hitbox in hitbox_start_frames[current_tick + 1]:
+			if not hitbox.activated:
+				continue
+			hitbox.update_position(pos.x, pos.y)
 			activate_hitbox(hitbox)
 			if hitbox is Hitbox:
 				if hitbox.hitbox_type == Hitbox.HitboxType.ThrowHit:
 					hitbox.hit(host.opponent)
 					hitbox.deactivate()
 	for hitbox in get_active_hitboxes():
+		hitbox.update_position(pos.x, pos.y)
 		hitbox.facing = host.get_facing()
 		if hitbox.active:
 			hitbox.tick()
 		else :
 			deactivate_hitbox(hitbox)
 
-
-func update_hurtbox():
+func process_hurtboxes():
 	if current_hurtbox:
 		current_hurtbox.tick(host)
 	if current_tick in hurtbox_state_change_frames:
@@ -308,7 +348,14 @@ func update_hurtbox():
 			current_hurtbox.end(host)
 		current_hurtbox = hurtbox_state_change_frames[current_tick]
 		current_hurtbox.start(host)
-		
+	var pos = host.get_pos()
+	for hurtbox in limb_hurtboxes:
+		if hurtbox is LimbHurtbox:
+			hurtbox.active = is_hurtbox_active(hurtbox)
+			hurtbox.facing = host.get_facing()
+			hurtbox.update_position(pos.x, pos.y)
+
+
 func copy_data():
 	var d = null
 	if data:
@@ -318,18 +365,31 @@ func copy_data():
 			d = data
 	return d
 
-func copy_to(state:ObjectState):
-	var properties = get_script().get_script_property_list()
-	for variable in properties:
-		var value = get(variable.name)
-		if not (value is Object or value is Array or value is Dictionary):
-			state.set(variable.name, value)
+
+
+
+
+
+func _copy_to(state:ObjectState):
 	state.data = copy_data()
 	state.current_real_tick = current_real_tick
 	state.current_tick = current_real_tick
+	var pos = host.get_pos()
 	for h in get_children():
 		if (h is Hitbox):
 			h.copy_to(state.get_node(h.name))
+			h.update_position(pos.x, pos.y)
+
+
+
+
+
+func copy_to(state:ObjectState):
+
+	state.property_list = property_list
+
+	native.copy_state(self, state)
+	_copy_to(state)
 
 func copy_hurtbox_states(state:ObjectState):
 	for i in range(get_child_count()):
@@ -341,7 +401,9 @@ func copy_hurtbox_states(state:ObjectState):
 			child.copy_to(state.get_child(i))
 
 func activate_hitbox(hitbox):
+	hitbox.facing = host.get_facing()
 	hitbox.activate()
+
 
 func terminate_hitboxes():
 	for hitbox in get_active_hitboxes():
@@ -355,6 +417,7 @@ func init():
 	connect("state_started", host, "on_state_started", [self])
 	connect("state_ended", host, "on_state_ended", [self])
 	fixed = host.fixed
+	native = host.native
 	anim_name = sprite_animation if sprite_animation else state_name
 	if sprite_anim_length < 0:
 		if host.sprite.frames.has_animation(anim_name):
@@ -369,6 +432,28 @@ func init():
 			if not (child.tick in host_command_nodes):
 				host_command_nodes[child.tick] = []
 			host_command_nodes[child.tick].append(child)
+	update_property_list()
+	.init()
+
+func get_host_command(command_name):
+	for command in host_command_nodes.values() + host_commands.values():
+		if command is Array:
+			for c in command:
+				if c is Dictionary:
+					if command_name in c:
+						return c
+				elif c is HostCommand:
+					if command_name == c.command:
+						return c
+		if command is Dictionary:
+			if command_name in command:
+				return command
+
+func update_property_list():
+	if not host.is_ghost:
+		property_list = Utils.get_copiable_properties(self)
+		for hitbox in all_hitbox_nodes:
+			hitbox.update_property_list()
 
 func setup_audio():
 	if enter_sfx:
@@ -386,36 +471,50 @@ func setup_audio():
 		sfx_player.volume_db = sfx_volume
 
 func setup_hitboxes():
-	var hitboxes = []
+	all_hitbox_nodes = []
 	for child in get_children():
 		if child is Hitbox:
-			hitboxes.append(child)
+			all_hitbox_nodes.append(child)
 			host.hitboxes.append(child)
-	for hitbox in hitboxes:
+			child.native = native
+			if child.guard_break:
+				is_guard_break = true
+	var earliest = 999999999
+	for hitbox in all_hitbox_nodes:
+		hitbox.host = host
 		hitbox.init()
 		has_hitboxes = true
-		hitbox.host = host
-		if hitbox.start_tick >= 0:
+		if not host.is_ghost:
+			hitbox.property_list = get_script().get_property_list()
+		if hitbox.start_tick > 0:
 			if hitbox_start_frames.has(hitbox.start_tick):
 				hitbox_start_frames[hitbox.start_tick].append(hitbox)
 			else :
 				hitbox_start_frames[hitbox.start_tick] = [hitbox]
+			if hitbox.start_tick < earliest:
+				earliest = hitbox.start_tick
+				earliest_hitbox_node = hitbox
 		hitbox.connect("hit_something", self, "__on_hit_something")
 		hitbox.connect("got_parried", self, "__on_got_parried")
-		for hitbox2 in hitboxes:
+		for hitbox2 in all_hitbox_nodes:
 			if hitbox2.group == hitbox.group:
 				hitbox.grouped_hitboxes.append(hitbox2)
+	if earliest_hitbox <= 0 and earliest != 999999999:
+		earliest_hitbox = earliest
+		
 
 func setup_hurtboxes():
 	for child in get_children():
 		if child is HurtboxState:
 			hurtbox_state_change_frames[child.start_tick] = child
-
+		if child is LimbHurtbox:
+			limb_hurtboxes.append(child)
 
 func __on_hit_something(obj, hitbox):
 	if active:
 		_on_hit_something(obj, hitbox)
 		host._on_hit_something(obj, hitbox)
+
 
 func __on_got_parried():
 	if active:
@@ -454,6 +553,18 @@ func _exit_shared():
 		current_hurtbox.end(host)
 	last_facing = host.get_facing_int()
 	host.reset_hurtbox()
+	host.end_invulnerability()
+	host.end_projectile_invulnerability()
+	host.end_throw_invulnerability()
+
+	host.end_aerial_attack_invulnerability()
+	host.end_grounded_attack_invulnerability()
+	for child in get_children():
+		if child is LimbHurtbox:
+			child.active = false
+
+	if disable_at_end:
+		host.disable()
 
 func xy_to_dir(x, y, mul = "1.0", div = "100.0"):
 	return host.xy_to_dir(x, y, mul, div)
