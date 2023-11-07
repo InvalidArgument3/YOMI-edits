@@ -40,6 +40,8 @@ var name_paths = {
 	"Wizard":"res://characters/wizard/Wizard.tscn", 
 	"Robot":"res://characters/robo/Robot.tscn", 
 	"Mutant":"res://characters/mutant/Mutant.tscn", 
+	"HongMeiling":"res://HongMeiling/characters/HongMeiling/HongMeiling.tscn", 
+	"HakureiReimu":"res://HakureiReimu/characters/HakureiReimu/HakureiReimu.tscn", 
 }
 
 var songs = {
